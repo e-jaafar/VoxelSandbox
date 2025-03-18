@@ -1,0 +1,62 @@
+// Set up UI event handlers in a way that prevents them from affecting the 3D scene
+      // First prevent any mouse events from propagating through the controls UI
+      const controlsUI = document.getElementById('controls');
+
+      // Stop all mouse events from propagating through the UI
+      ['mousedown', 'mouseup', 'click', 'dblclick', 'mousemove', 'wheel'].forEach(eventType => {
+        controlsUI.addEventListener(eventType, (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+        }, true); // Use capture phase to ensure events are caught before they bubble
+      });
+
+      // Handle color selection with clean event isolation
+      document.querySelectorAll('.color-btn').forEach(btn => {
+        btn.addEventListener('pointerdown', (e) => {
+          // Prevent any propagation and default actions
+          e.stopPropagation();
+          e.preventDefault();
+
+          // Update active color UI
+          document.querySelector('.color-btn.active').classList.remove('active');
+          btn.classList.add('active');
+
+          // Update color state
+          activeColor = btn.getAttribute('data-color');
+
+          // Update preview if visible
+          if (placementCube.visible && !isRemoveMode) {
+            placementCube.material.color.set(activeColor);
+          }
+
+          // Log color change
+          log(`Color changed to ${activeColor}`);
+        });
+      });
+
+      // Handle mode selection with clean event isolation
+      document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.addEventListener('pointerdown', (e) => {
+          // Prevent any propagation and default actions
+          e.stopPropagation();
+          e.preventDefault();
+
+          // Update active mode UI
+          document.querySelector('.mode-btn.active').classList.remove('active');
+          btn.classList.add('active');
+
+          // Update mode state
+          isRemoveMode = btn.getAttribute('data-mode') === 'remove';
+
+          // Update preview if visible
+          if (placementCube.visible) {
+            placementCube.material.color.set(isRemoveMode ? '#ff0000' : activeColor);
+          }
+
+          // Log mode change
+          log(`Mode changed to ${isRemoveMode ? 'REMOVE' : 'BUILD'}`);
+        });
+      });
+
+// Prevent right-click context menu which can interfere with controls
+document.addEventListener('contextmenu', event => event.preventDefault());
